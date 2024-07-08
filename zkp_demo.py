@@ -1,44 +1,54 @@
 import streamlit as st
 import random
-import hashlib
 
-def hash_function(data):
-    return hashlib.sha256(data.encode()).hexdigest()
+def main():
+    st.title("Alibaba Cave Zero-Knowledge Proof Demo")
 
-st.title("Zero-Knowledge Proof Demo with Jack")
+    # Initialize session state
+    if 'path_chosen' not in st.session_state:
+        st.session_state['path_chosen'] = None
+    if 'revealed_path' not in st.session_state:
+        st.session_state['revealed_path'] = None
+    if 'attempts' not in st.session_state:
+        st.session_state['attempts'] = 0
+    if 'successes' not in st.session_state:
+        st.session_state['successes'] = 0
 
-st.write("""
-This demo shows a simple Zero-Knowledge Proof where Jack (Prover) proves to Bob (Verifier) that he knows a secret number without revealing it.
-""")
+    st.header("Scenario")
+    st.write("""
+    Imagine a cave with two entrances, A and B, leading to a central door that requires a secret password to pass. 
+    Jack (the prover) will enter through one entrance, and Bob (the verifier) will call out which entrance Jack should exit from. 
+    If Jack knows the secret password, she can always exit through the correct entrance.
+    """)
 
-secret_number = st.text_input("Jack's Secret Number", type="password")
-if not secret_number:
-    st.warning("Please enter a secret number to continue.")
-    st.stop()
+    st.header("Simulation")
+    if st.session_state['path_chosen'] is None:
+        if st.button("Jack Enters the Cave"):
+            st.session_state['path_chosen'] = random.choice(['A', 'B'])
+            st.write("Jack has entered the cave. Bob should now choose an exit.")
 
-if st.button("Start Zero-Knowledge Proof"):
-    # Jack generates the hashed secret
-    hashed_secret = hash_function(secret_number)
-    
-    # Bob sends a random challenge
-    challenge = random.randint(0, 1)
-    st.write(f"Bob's Challenge: {'Prove you know the secret' if challenge == 0 else 'Prove you know something else'}")
-    
-    # Jack responds
-    if challenge == 0:
-        response = hashed_secret
-    else:
-        response = hash_function(secret_number[::-1])  # Example: different proof, reversing the secret
+    if st.session_state['path_chosen'] is not None:
+        st.write("Jack has entered through entrance", st.session_state['path_chosen'])
+        path_choice = st.radio("Bob's Choice", ('A', 'B'))
 
-    st.write(f"Jack's Response: {response}")
+        if st.button("Submit Choice"):
+            st.session_state['revealed_path'] = path_choice
+            st.session_state['attempts'] += 1
+            if st.session_state['path_chosen'] == st.session_state['revealed_path']:
+                st.session_state['successes'] += 1
 
-    # Bob verifies the response
-    if challenge == 0:
-        verification = response == hashed_secret
-    else:
-        verification = response == hash_function(secret_number[::-1])
-    
-    if verification:
-        st.success("Bob is convinced that Jack knows the secret!")
-    else:
-        st.error("Verification failed. Bob is not convinced.")
+            st.write(f"Bob chose entrance {st.session_state['revealed_path']}.")
+            if st.session_state['path_chosen'] == st.session_state['revealed_path']:
+                st.write("Jack successfully exited through the correct entrance!")
+            else:
+                st.write("Jack failed to exit through the correct entrance.")
+
+            st.session_state['path_chosen'] = None
+            st.session_state['revealed_path'] = None
+
+    st.header("Results")
+    st.write(f"Total Attempts: {st.session_state['attempts']}")
+    st.write(f"Successful Exits: {st.session_state['successes']}")
+
+if __name__ == "__main__":
+    main()
