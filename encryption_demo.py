@@ -88,21 +88,28 @@ elif operation == "Encryption":
             st.session_state.asymmetric_ciphertext = asymmetric_ciphertext
 
 elif operation == "Decryption":
-    if "symmetric_key" in st.session_state:
-        with col1:
-            st.subheader("Symmetric Encryption")
-            if "iv" in st.session_state and "symmetric_ciphertext" in st.session_state:
-                symmetric_decrypted_text = symmetric_decryption(st.session_state.iv, st.session_state.symmetric_ciphertext, st.session_state.symmetric_key)
-                st.write("Decrypted Text:")
-                st.code(symmetric_decrypted_text)
+    with col1:
+        st.subheader("Symmetric Decryption")
+        iv = st.text_input("Enter the IV:", value=st.session_state.get("iv", ""))
+        symmetric_ciphertext = st.text_area("Enter the ciphertext:", value=st.session_state.get("symmetric_ciphertext", ""))
+        if st.button("Decrypt Symmetric Ciphertext"):
+            try:
+                symmetric_decrypted_text = symmetric_decryption(iv, symmetric_ciphertext, st.session_state.symmetric_key)
+            except Exception as e:
+                symmetric_decrypted_text = f"Decryption failed: {e}"
+            st.write("Decrypted Text:")
+            st.code(symmetric_decrypted_text)
 
-    if "private_key" in st.session_state:
-        with col2:
-            st.subheader("Asymmetric Encryption")
-            if "asymmetric_ciphertext" in st.session_state:
-                asymmetric_decrypted_text = asymmetric_decryption(st.session_state.asymmetric_ciphertext, st.session_state.private_key)
-                st.write("Decrypted Text:")
-                st.code(asymmetric_decrypted_text)
+    with col2:
+        st.subheader("Asymmetric Decryption")
+        asymmetric_ciphertext = st.text_area("Enter the ciphertext:", value=st.session_state.get("asymmetric_ciphertext", ""))
+        if st.button("Decrypt Asymmetric Ciphertext"):
+            try:
+                asymmetric_decrypted_text = asymmetric_decryption(asymmetric_ciphertext, st.session_state.private_key)
+            except Exception as e:
+                asymmetric_decrypted_text = f"Decryption failed: {e}"
+            st.write("Decrypted Text:")
+            st.code(asymmetric_decrypted_text)
 
 if operation == "Encryption":
     if "symmetric_key" in st.session_state and plaintext:
