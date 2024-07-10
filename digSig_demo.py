@@ -19,7 +19,7 @@ page = st.sidebar.radio("Go to", ["Home", "View Keys"])
 
 # Home Page
 if page == "Home":
-    st.title("Digital Signature and PKI Demo")
+    st.title("Digital Signature Demo")
 
     # Message Input
     st.subheader("Enter a message to sign")
